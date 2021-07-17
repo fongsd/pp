@@ -1,0 +1,174 @@
+%{
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <map>
+
+extern int yylex();
+
+void yyerror(std::string s) {
+	std::cout << "Syntax error: " << s << std::endl;
+	exit(EXIT_FAILURE);
+}
+
+std::map<char, std::vector<float>*> promenljive;
+%}
+
+%union {
+	char ime;
+	float vrednost;
+	std::vector<float> *v;
+}
+
+%token PRINT_T ASGN_T UGAO_T EKV_T
+%token<ime> ID_T
+%token<vrednost> BROJ_T
+
+%type<v> izraz lista_el vektor
+%type<vrednost> broj
+
+%left '+' '-'
+%left '*'
+%right U_MINUS
+
+%start program
+
+%%
+
+program: program naredba ';'
+	| naredba ';'
+	;
+naredba: ID_T ASGN_T izraz		{
+									promenljive[$1] = new std::vector<float>(*$3);
+									delete $3;
+								}
+	| PRINT_T '(' izraz ')'		{
+									std::cout << '<';
+									for(int i = 0; i < $3->size(); i++)
+									{
+										std::cout << (*$3)[i];
+										if(i < $3->size() - 1)
+											std::cout << ',';
+									}
+									std::cout << '>' << std::endl;
+								}
+	| izraz '.' izraz			{
+									if($1->size() != $3->size())
+										yyerror("Dimenzije vektora se ne podudaraju");
+									float rez = 0;
+									for(int i = 0; i < $1->size(); i++)
+										rez += (*$1)[i] * (*$3)[i];
+									std::cout << rez << std::endl;
+									delete $1;
+									delete $3;
+								}
+	| '|' izraz '|'				{
+									float rez = 0;
+									for(int i = 0; i < $2->size(); i++)
+										rez += (*$2)[i] * (*$2)[i];
+									rez = sqrt(rez);
+									std::cout << rez << std::endl;
+									delete $2;
+								}
+	| UGAO_T '(' izraz ',' izraz ')'	{
+											if($3->size() != $5->size())
+												yyerror("Dimenzije vektora se ne podudaraju");
+											float rez = 0;
+											float norma_1 = 0, norma_2 = 0, skal = 0;
+											for(int i = 0; i < $3->size(); i++)
+											{
+												norma_1 += (*$3)[i] * (*$3)[i];
+												norma_2 += (*$5)[i] * (*$5)[i];
+												skal += (*$3)[i] * (*$5)[i];
+											}
+											norma_1 = sqrt(norma_1);
+											norma_2 = sqrt(norma_2);
+											rez = acos(skal / norma_1 / norma_2) * 180 / M_PI;
+											std::cout << rez << std::endl;
+										}
+	| EKV_T '(' izraz ',' izraz ')'		{
+											if($3->size() != $5->size())
+												std::cout << "False" << std::endl;
+											else
+											{
+												float umnozak = (*$3)[0] / (*$5)[0];
+												int zastava = 1;
+												for(int i = 1; i < $3->size(); i++)
+												{
+													if((*$3)[i] / (*$5)[i] != umnozak)
+													{
+														std::cout << "False" << std::endl;
+														zastava = 0;
+														break;
+													}
+												}
+												if(zastava == 1)
+													std::cout << "True" << std::endl;
+											}
+										}
+	;
+izraz: izraz '+' izraz			{
+									if($1->size() != $3->size())
+										yyerror("Dimenzije vektora se ne podudaraju");
+									std::vector<float> *rez = new std::vector<float>(*$1);
+									for(int i = 0; i < rez->size(); i++)
+										(*rez)[i] += (*$3)[i];
+									$$ = rez;
+									delete $1;
+									delete $3;
+								}
+	| izraz '-' izraz			{
+									if($1->size() != $3->size())
+										yyerror("Dimenzije vektora se ne podudaraju");
+									std::vector<float> *rez = new std::vector<float>(*$1);
+									for(int i = 0; i < rez->size(); i++)
+										(*rez)[i] -= (*$3)[i];
+									$$ = rez;
+									delete $1;
+									delete $3;
+								}
+	| broj '*' izraz			{
+									std::vector<float> *rez = new std::vector<float>(*$3);
+									for(int i = 0; i < rez->size(); i++)
+										(*rez)[i] *= $1;
+									$$ = rez;
+									delete $3;
+								}
+	| vektor					{
+									$$ = new std::vector<float>(*$1);
+									delete $1;
+								}
+	| ID_T						{
+									auto it = promenljive.find($1);
+									if(it == promenljive.end())
+										yyerror("Upotreba nedefinisane promenljive");
+									$$ = new std::vector<float>(*(it->second));
+								}
+	;
+vektor: '<' lista_el '>'		{ $$ = $2; }
+	;
+lista_el: lista_el ',' broj		{
+									$1->push_back($3);
+									$$ = $1;
+								}
+	| broj						{
+									$$ = new std::vector<float>;
+									$$->push_back($1);
+								}
+	;
+broj: BROJ_T					{ $$ = $1; }
+	| '-' BROJ_T %prec U_MINUS	{ $$ = -$2; }
+	;
+
+%%
+
+int main(int argc, char *argv[]) {
+	if(yyparse() == 0)
+		std::cout << "Program je sintaksno ispravan" << std::endl;
+	else
+		std::cout << "Program nije sintaksno ispravan" << std::endl;
+	exit(EXIT_SUCCESS);
+}

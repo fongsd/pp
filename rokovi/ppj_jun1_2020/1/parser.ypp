@@ -1,0 +1,288 @@
+%{
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <cmath>
+
+#define YYDEBUG 1
+
+extern int yylex();
+
+void yyerror(std::string s){
+    std::cerr << s << std::endl;
+}
+ 
+std::map<std::string, long> vars;
+std::map<std::string, std::vector<long>*> lists; 
+int flag = 0;
+
+void print_izraz(long x){
+    long sekunde = (x % 3600)%60;
+    long minuti = (x % 3600) / 60;
+    long stepeni = (x / 3600) % 360;
+    
+    if(sekunde < 0)
+        sekunde += 60;
+    if(minuti < 0)
+        minuti += 60;
+    if(stepeni < 0)
+        stepeni += 360;
+    
+    printf("%ld.%ld.%ld", stepeni, minuti, sekunde);
+}
+
+double to_rads(long x){
+    return x * M_PI / (10800 * 60);
+}
+
+void print_izraz2(long x){
+    printf("%g rad", to_rads(x));
+}
+
+void print_lista(std::vector<long> *l){
+    std::cout << "[";
+    for(auto it = l->begin(); it != l->end(); it++)
+    {
+        if(it != l->begin())
+            std::cout << ", ";
+        print_izraz(*it);
+    }
+    std::cout << "]" << std::endl;
+}
+
+void print_lista2(std::vector<long> *l){
+    std::cout << "[";
+    for(auto it = l->begin(); it != l->end(); it++)
+    {
+        if(it != l->begin())
+            std::cout << ", ";
+        print_izraz2(*it);
+    }
+    std::cout << "]" << std::endl;
+}
+
+long sve_u_sekunde(long x, long y, long z){
+    return x * 3600 + y * 60 + z;
+}
+
+long prosek(std::vector<long> *v){
+    long suma = 0;
+    for(long x : *v)
+        suma += x;
+    return suma / v->size();
+}
+
+%}
+
+%union {
+    long vrednost;
+    std::string *ime;
+    std::vector<long> *el;
+}
+
+%token MIN_T MAX_T PROSEK_T EQ_T NEQ_T LTEQ_T GTEQ_T RAD_T
+
+%token<ime> ID_T LID_T
+%token<vrednost> BROJ_T
+
+%left EQ_T NEQ_T
+%left '<' '>' LTEQ_T GTEQ_T 
+%left '+' '-'
+%left '*' '/'
+
+%type<vrednost> izraz relacioni
+%type<el> elementi lista
+
+%start program
+
+%%
+program:    program naredba '\n'                        {}  
+            | naredba '\n'                              {}
+            ;
+naredba:    ID_T '=' izraz                              {
+                                                            if(!flag){
+                                                                vars[*$1] = $3;
+                                                            }
+                                                            delete $1;
+                                                            flag = 0;
+                                                        }
+            | LID_T '=' lista                           {
+                                                            if(!flag){
+                                                                 auto it = lists.find(*$1);
+                                                                if(it != lists.end())
+                                                                    delete it->second;
+                                                                lists[*$1] = new std::vector<long>(*$3);
+                                                            }
+                                                            delete $1;
+                                                            delete $3;
+                                                            flag = 0;
+                                                        }
+            | izraz                                     {
+                                                            if(!flag){
+                                                                print_izraz($1);
+                                                                std::cout << std::endl;
+                                                            }
+                                                            flag = 0;
+                                                        }
+            | lista                                     {
+                                                            if(!flag){
+                                                                print_lista($1);
+                                                            }
+                                                            flag = 0;
+                                                        }
+            | relacioni                                 {
+                                                            if(!flag){
+                                                                if($1){
+                                                                    std::cout << "True" << std::endl;
+                                                                }
+                                                                else{
+                                                                    std::cout << "False" << std::endl;
+                                                                }
+                                                            }
+                                                        
+                                                            flag = 0;
+                                                        }
+            | RAD_T '(' izraz ')'                         { 
+                                                            if(!flag){
+                                                                print_izraz2($3);
+                                                                std::cout << std::endl;
+                                                            }
+                                                            flag = 0;
+                                                        }
+            | RAD_T '(' lista ')'                         { 
+                                                            if(!flag){
+                                                                print_lista2($3);
+                                                            }
+                                                            flag = 0;
+                                                        }
+            ;
+izraz:      izraz '+' izraz                             {$$ = $1 + $3;}
+            | izraz '-' izraz                           {$$ = $1 - $3;}
+            | '(' izraz ')'                             {$$ = $2;}
+            | BROJ_T '*' izraz                          {$$ = $1 * $3;}
+            | izraz '*' BROJ_T                          {$$ = $1 * $3;}
+            | izraz '/' BROJ_T                          {$$ = $1 / $3;}
+            | BROJ_T '.' BROJ_T '.' BROJ_T              {
+                                                            if(  !( ($5 >= 0 && $5 <= 60)  && ($3 >= 0 && $3 <= 60) && ($1 >= 0 && $1 <= 360) )){
+                                                                std::cout << "neispravan izraz" << std::endl;
+                                                                flag = 1;
+                                                            }
+                                                            else{
+                                                                $$ = sve_u_sekunde($1, $3, $5);
+                                                            }
+                                                        }         
+            | ID_T                                      {
+                                                            auto it = vars.find(*$1);
+                                                            if(it == vars.end()){
+                                                                yyerror("Nedefinisana promenljiva.");
+                                                                flag = 1;
+                                                            }else{
+                                                                $$ = it->second;
+                                                            }
+                                                           delete $1;
+                                                        }
+            | LID_T '[' BROJ_T ']'                      {
+                                                            auto it = lists.find(*$1);
+                                                            if(it == lists.end()){
+                                                                yyerror("Nedefinisana lista.");
+                                                                flag = 1;
+                                                            }else {
+                                                                if( $3 >= it->second->size()){
+                                                                    yyerror("Indeks van granica.");
+                                                                    flag = 1;
+                                                                }else{
+                                                                    $$ = (*it->second)[$3];
+                                                                }
+                                                            }
+                                                            delete $1;
+                                                        }
+            | MAX_T '(' lista ')'                       {
+                                                            $$ = *max_element($3->begin(), $3->end());
+                                                            delete $3;
+                                                        }
+            | MIN_T '(' lista ')'                       {
+                                                            $$ = *min_element($3->begin(), $3->end());
+                                                            delete $3;
+                                                        }
+            | PROSEK_T '(' lista ')'                    {
+                                                            $$ = prosek($3);
+                                                            delete $3;
+                                                        }
+            ;
+relacioni:  izraz EQ_T izraz                            {
+                                                            if($1 == $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            | izraz NEQ_T izraz                         {
+                                                            if($1 != $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            | izraz GTEQ_T izraz                        {
+                                                            if($1 >= $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            | izraz LTEQ_T izraz                        {
+                                                            if($1 <= $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            | izraz '>' izraz                           {
+                                                            if($1 > $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            | izraz '<' izraz                           {
+                                                            if($1 <= $3){
+                                                                $$ = 1;
+                                                            }else{
+                                                                $$ = 0;
+                                                            }
+                                                        }
+            ;
+lista:      '[' elementi ']'                            { $$ = $2;}
+            | LID_T                                     {
+                                                            auto it = lists.find(*$1);
+                                                            if(it == lists.end()){
+                                                                yyerror("Nedefinisana lista.");
+                                                                flag = 1;
+                                                            }else {
+                                                               $$ = new std::vector<long>( *(it->second));
+                                                            }
+                                                            delete $1;
+                                                        }
+            ;
+elementi:   elementi ',' izraz                          {
+                                                            $1->push_back($3);
+                                                            $$ = $1;
+                                                        }
+            | izraz                                     {
+                                                            $$ = new std::vector<long>(1, $1);
+                                                        }
+            ;
+%%
+
+int main(int argc, char** argv){
+    //yydebug = 1;
+    if(yyparse() == 0)
+        std::cout << "Sve ok" << std::endl;
+    else
+        std::cout << "Greska pri parsiranju" << std::endl;
+    
+    return 0;
+}

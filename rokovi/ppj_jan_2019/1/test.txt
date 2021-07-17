@@ -1,0 +1,12 @@
+list lx = [5,5,5];
+list lm = lx;
+int _x = lm[1];
+print(_x, 2);
+list lz = lx;
+print(lx);
+print(lz);
+print(lx[0] << lx[1]);
+int _y = lx[0] + lx[1] + lx[2];
+int _x = 5;
+int _z = _x + _y;
+print(_z);

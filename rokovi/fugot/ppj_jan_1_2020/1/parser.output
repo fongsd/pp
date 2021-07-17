@@ -1,0 +1,650 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: niz_naredbi BYE_T '\n'
+
+    2 niz_naredbi: niz_naredbi naredba '\n'
+    3            | %empty
+
+    4 naredba: ID_T IZ_T izraz
+    5        | PRINT_T izraz
+    6        | COND_T izraz IZ_T GT_T izraz '\n' PRINT_T izraz
+    7        | COND_T izraz IZ_T NEG_T GT_T izraz '\n' PRINT_T izraz
+    8        | COND_T izraz IZ_T EQ_T izraz '\n' PRINT_T izraz
+    9        | COND_T izraz IZ_T NEG_T EQ_T izraz '\n' PRINT_T izraz
+
+   10 izraz: izraz '+' izraz
+   11      | izraz '-' izraz
+   12      | izraz '*' izraz
+   13      | '(' izraz ')'
+   14      | BROJ_T
+   15      | ID_T
+   16      | INC_T ID_T
+   17      | DEC_T ID_T
+   18      | ID_T INC_T
+   19      | ID_T DEC_T
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'\n' (10) 1 2 6 7 8 9
+'(' (40) 13
+')' (41) 13
+'*' (42) 12
+'+' (43) 10
+'-' (45) 11
+error (256)
+BYE_T (258) 1
+IZ_T (259) 4 6 7 8 9
+INC_T (260) 16 18
+DEC_T (261) 17 19
+PRINT_T (262) 5 6 7 8 9
+COND_T (263) 6 7 8 9
+NEG_T (264) 7 9
+GT_T (265) 6 7
+EQ_T (266) 8 9
+BROJ_T (267) 14
+ID_T (268) 4 15 16 17 18 19
+
+
+Nonterminals, with rules where they appear
+
+$accept (20)
+    on left: 0
+program (21)
+    on left: 1, on right: 0
+niz_naredbi (22)
+    on left: 2 3, on right: 1 2
+naredba (23)
+    on left: 4 5 6 7 8 9, on right: 2
+izraz (24)
+    on left: 10 11 12 13 14 15 16 17 18 19, on right: 4 5 6 7 8 9 10
+    11 12 13
+
+
+State 0
+
+    0 $accept: . program $end
+
+    $default  reduce using rule 3 (niz_naredbi)
+
+    program      go to state 1
+    niz_naredbi  go to state 2
+
+
+State 1
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    1 program: niz_naredbi . BYE_T '\n'
+    2 niz_naredbi: niz_naredbi . naredba '\n'
+
+    BYE_T    shift, and go to state 4
+    PRINT_T  shift, and go to state 5
+    COND_T   shift, and go to state 6
+    ID_T     shift, and go to state 7
+
+    naredba  go to state 8
+
+
+State 3
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 4
+
+    1 program: niz_naredbi BYE_T . '\n'
+
+    '\n'  shift, and go to state 9
+
+
+State 5
+
+    5 naredba: PRINT_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 15
+
+
+State 6
+
+    6 naredba: COND_T . izraz IZ_T GT_T izraz '\n' PRINT_T izraz
+    7        | COND_T . izraz IZ_T NEG_T GT_T izraz '\n' PRINT_T izraz
+    8        | COND_T . izraz IZ_T EQ_T izraz '\n' PRINT_T izraz
+    9        | COND_T . izraz IZ_T NEG_T EQ_T izraz '\n' PRINT_T izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 16
+
+
+State 7
+
+    4 naredba: ID_T . IZ_T izraz
+
+    IZ_T  shift, and go to state 17
+
+
+State 8
+
+    2 niz_naredbi: niz_naredbi naredba . '\n'
+
+    '\n'  shift, and go to state 18
+
+
+State 9
+
+    1 program: niz_naredbi BYE_T '\n' .
+
+    $default  reduce using rule 1 (program)
+
+
+State 10
+
+   16 izraz: INC_T . ID_T
+
+    ID_T  shift, and go to state 19
+
+
+State 11
+
+   17 izraz: DEC_T . ID_T
+
+    ID_T  shift, and go to state 20
+
+
+State 12
+
+   14 izraz: BROJ_T .
+
+    $default  reduce using rule 14 (izraz)
+
+
+State 13
+
+   15 izraz: ID_T .
+   18      | ID_T . INC_T
+   19      | ID_T . DEC_T
+
+    INC_T  shift, and go to state 21
+    DEC_T  shift, and go to state 22
+
+    $default  reduce using rule 15 (izraz)
+
+
+State 14
+
+   13 izraz: '(' . izraz ')'
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 23
+
+
+State 15
+
+    5 naredba: PRINT_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 5 (naredba)
+
+
+State 16
+
+    6 naredba: COND_T izraz . IZ_T GT_T izraz '\n' PRINT_T izraz
+    7        | COND_T izraz . IZ_T NEG_T GT_T izraz '\n' PRINT_T izraz
+    8        | COND_T izraz . IZ_T EQ_T izraz '\n' PRINT_T izraz
+    9        | COND_T izraz . IZ_T NEG_T EQ_T izraz '\n' PRINT_T izraz
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    IZ_T  shift, and go to state 27
+    '+'   shift, and go to state 24
+    '-'   shift, and go to state 25
+    '*'   shift, and go to state 26
+
+
+State 17
+
+    4 naredba: ID_T IZ_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 28
+
+
+State 18
+
+    2 niz_naredbi: niz_naredbi naredba '\n' .
+
+    $default  reduce using rule 2 (niz_naredbi)
+
+
+State 19
+
+   16 izraz: INC_T ID_T .
+
+    $default  reduce using rule 16 (izraz)
+
+
+State 20
+
+   17 izraz: DEC_T ID_T .
+
+    $default  reduce using rule 17 (izraz)
+
+
+State 21
+
+   18 izraz: ID_T INC_T .
+
+    $default  reduce using rule 18 (izraz)
+
+
+State 22
+
+   19 izraz: ID_T DEC_T .
+
+    $default  reduce using rule 19 (izraz)
+
+
+State 23
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+   13      | '(' izraz . ')'
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+    ')'  shift, and go to state 29
+
+
+State 24
+
+   10 izraz: izraz '+' . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 30
+
+
+State 25
+
+   11 izraz: izraz '-' . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 31
+
+
+State 26
+
+   12 izraz: izraz '*' . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 32
+
+
+State 27
+
+    6 naredba: COND_T izraz IZ_T . GT_T izraz '\n' PRINT_T izraz
+    7        | COND_T izraz IZ_T . NEG_T GT_T izraz '\n' PRINT_T izraz
+    8        | COND_T izraz IZ_T . EQ_T izraz '\n' PRINT_T izraz
+    9        | COND_T izraz IZ_T . NEG_T EQ_T izraz '\n' PRINT_T izraz
+
+    NEG_T  shift, and go to state 33
+    GT_T   shift, and go to state 34
+    EQ_T   shift, and go to state 35
+
+
+State 28
+
+    4 naredba: ID_T IZ_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 4 (naredba)
+
+
+State 29
+
+   13 izraz: '(' izraz ')' .
+
+    $default  reduce using rule 13 (izraz)
+
+
+State 30
+
+   10 izraz: izraz . '+' izraz
+   10      | izraz '+' izraz .
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 10 (izraz)
+
+
+State 31
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   11      | izraz '-' izraz .
+   12      | izraz . '*' izraz
+
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 11 (izraz)
+
+
+State 32
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+   12      | izraz '*' izraz .
+
+    $default  reduce using rule 12 (izraz)
+
+
+State 33
+
+    7 naredba: COND_T izraz IZ_T NEG_T . GT_T izraz '\n' PRINT_T izraz
+    9        | COND_T izraz IZ_T NEG_T . EQ_T izraz '\n' PRINT_T izraz
+
+    GT_T  shift, and go to state 36
+    EQ_T  shift, and go to state 37
+
+
+State 34
+
+    6 naredba: COND_T izraz IZ_T GT_T . izraz '\n' PRINT_T izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 38
+
+
+State 35
+
+    8 naredba: COND_T izraz IZ_T EQ_T . izraz '\n' PRINT_T izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 39
+
+
+State 36
+
+    7 naredba: COND_T izraz IZ_T NEG_T GT_T . izraz '\n' PRINT_T izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 40
+
+
+State 37
+
+    9 naredba: COND_T izraz IZ_T NEG_T EQ_T . izraz '\n' PRINT_T izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 41
+
+
+State 38
+
+    6 naredba: COND_T izraz IZ_T GT_T izraz . '\n' PRINT_T izraz
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'   shift, and go to state 24
+    '-'   shift, and go to state 25
+    '*'   shift, and go to state 26
+    '\n'  shift, and go to state 42
+
+
+State 39
+
+    8 naredba: COND_T izraz IZ_T EQ_T izraz . '\n' PRINT_T izraz
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'   shift, and go to state 24
+    '-'   shift, and go to state 25
+    '*'   shift, and go to state 26
+    '\n'  shift, and go to state 43
+
+
+State 40
+
+    7 naredba: COND_T izraz IZ_T NEG_T GT_T izraz . '\n' PRINT_T izraz
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'   shift, and go to state 24
+    '-'   shift, and go to state 25
+    '*'   shift, and go to state 26
+    '\n'  shift, and go to state 44
+
+
+State 41
+
+    9 naredba: COND_T izraz IZ_T NEG_T EQ_T izraz . '\n' PRINT_T izraz
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'   shift, and go to state 24
+    '-'   shift, and go to state 25
+    '*'   shift, and go to state 26
+    '\n'  shift, and go to state 45
+
+
+State 42
+
+    6 naredba: COND_T izraz IZ_T GT_T izraz '\n' . PRINT_T izraz
+
+    PRINT_T  shift, and go to state 46
+
+
+State 43
+
+    8 naredba: COND_T izraz IZ_T EQ_T izraz '\n' . PRINT_T izraz
+
+    PRINT_T  shift, and go to state 47
+
+
+State 44
+
+    7 naredba: COND_T izraz IZ_T NEG_T GT_T izraz '\n' . PRINT_T izraz
+
+    PRINT_T  shift, and go to state 48
+
+
+State 45
+
+    9 naredba: COND_T izraz IZ_T NEG_T EQ_T izraz '\n' . PRINT_T izraz
+
+    PRINT_T  shift, and go to state 49
+
+
+State 46
+
+    6 naredba: COND_T izraz IZ_T GT_T izraz '\n' PRINT_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 50
+
+
+State 47
+
+    8 naredba: COND_T izraz IZ_T EQ_T izraz '\n' PRINT_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 51
+
+
+State 48
+
+    7 naredba: COND_T izraz IZ_T NEG_T GT_T izraz '\n' PRINT_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 52
+
+
+State 49
+
+    9 naredba: COND_T izraz IZ_T NEG_T EQ_T izraz '\n' PRINT_T . izraz
+
+    INC_T   shift, and go to state 10
+    DEC_T   shift, and go to state 11
+    BROJ_T  shift, and go to state 12
+    ID_T    shift, and go to state 13
+    '('     shift, and go to state 14
+
+    izraz  go to state 53
+
+
+State 50
+
+    6 naredba: COND_T izraz IZ_T GT_T izraz '\n' PRINT_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 6 (naredba)
+
+
+State 51
+
+    8 naredba: COND_T izraz IZ_T EQ_T izraz '\n' PRINT_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 8 (naredba)
+
+
+State 52
+
+    7 naredba: COND_T izraz IZ_T NEG_T GT_T izraz '\n' PRINT_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 7 (naredba)
+
+
+State 53
+
+    9 naredba: COND_T izraz IZ_T NEG_T EQ_T izraz '\n' PRINT_T izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | izraz . '*' izraz
+
+    '+'  shift, and go to state 24
+    '-'  shift, and go to state 25
+    '*'  shift, and go to state 26
+
+    $default  reduce using rule 9 (naredba)

@@ -1,0 +1,521 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: program naredba ';'
+    2        | naredba ';'
+
+    3 naredba: ID_T DODELA_T izraz
+    4        | PRINT_T '(' izraz ')'
+    5        | UGAO_T '(' izraz ',' izraz ')'
+    6        | EQV_T '(' izraz ',' izraz ')'
+    7        | izraz '.' izraz
+    8        | '|' izraz '|'
+
+    9 izraz: izraz '+' izraz
+   10      | izraz '-' izraz
+   11      | BROJ_T '*' izraz
+   12      | lista
+
+   13 lista: '<' elementi '>'
+   14      | ID_T
+
+   15 elementi: elementi ',' BROJ_T
+   16         | BROJ_T
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 4 5 6
+')' (41) 4 5 6
+'*' (42) 11
+'+' (43) 9
+',' (44) 5 6 15
+'-' (45) 10
+'.' (46) 7
+';' (59) 1 2
+'<' (60) 13
+'>' (62) 13
+'|' (124) 8
+error (256)
+DODELA_T (258) 3
+PRINT_T (259) 4
+UGAO_T (260) 5
+EQV_T (261) 6
+ID_T (262) 3 14
+BROJ_T (263) 11 15 16
+
+
+Nonterminals, with rules where they appear
+
+$accept (20)
+    on left: 0
+program (21)
+    on left: 1 2, on right: 0 1
+naredba (22)
+    on left: 3 4 5 6 7 8, on right: 1 2
+izraz (23)
+    on left: 9 10 11 12, on right: 3 4 5 6 7 8 9 10 11
+lista (24)
+    on left: 13 14, on right: 12
+elementi (25)
+    on left: 15 16, on right: 13 15
+
+
+State 0
+
+    0 $accept: . program $end
+
+    PRINT_T  shift, and go to state 1
+    UGAO_T   shift, and go to state 2
+    EQV_T    shift, and go to state 3
+    ID_T     shift, and go to state 4
+    BROJ_T   shift, and go to state 5
+    '|'      shift, and go to state 6
+    '<'      shift, and go to state 7
+
+    program  go to state 8
+    naredba  go to state 9
+    izraz    go to state 10
+    lista    go to state 11
+
+
+State 1
+
+    4 naredba: PRINT_T . '(' izraz ')'
+
+    '('  shift, and go to state 12
+
+
+State 2
+
+    5 naredba: UGAO_T . '(' izraz ',' izraz ')'
+
+    '('  shift, and go to state 13
+
+
+State 3
+
+    6 naredba: EQV_T . '(' izraz ',' izraz ')'
+
+    '('  shift, and go to state 14
+
+
+State 4
+
+    3 naredba: ID_T . DODELA_T izraz
+   14 lista: ID_T .
+
+    DODELA_T  shift, and go to state 15
+
+    $default  reduce using rule 14 (lista)
+
+
+State 5
+
+   11 izraz: BROJ_T . '*' izraz
+
+    '*'  shift, and go to state 16
+
+
+State 6
+
+    8 naredba: '|' . izraz '|'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 18
+    lista  go to state 11
+
+
+State 7
+
+   13 lista: '<' . elementi '>'
+
+    BROJ_T  shift, and go to state 19
+
+    elementi  go to state 20
+
+
+State 8
+
+    0 $accept: program . $end
+    1 program: program . naredba ';'
+
+    $end     shift, and go to state 21
+    PRINT_T  shift, and go to state 1
+    UGAO_T   shift, and go to state 2
+    EQV_T    shift, and go to state 3
+    ID_T     shift, and go to state 4
+    BROJ_T   shift, and go to state 5
+    '|'      shift, and go to state 6
+    '<'      shift, and go to state 7
+
+    naredba  go to state 22
+    izraz    go to state 10
+    lista    go to state 11
+
+
+State 9
+
+    2 program: naredba . ';'
+
+    ';'  shift, and go to state 23
+
+
+State 10
+
+    7 naredba: izraz . '.' izraz
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    '.'  shift, and go to state 26
+
+
+State 11
+
+   12 izraz: lista .
+
+    $default  reduce using rule 12 (izraz)
+
+
+State 12
+
+    4 naredba: PRINT_T '(' . izraz ')'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 27
+    lista  go to state 11
+
+
+State 13
+
+    5 naredba: UGAO_T '(' . izraz ',' izraz ')'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 28
+    lista  go to state 11
+
+
+State 14
+
+    6 naredba: EQV_T '(' . izraz ',' izraz ')'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 29
+    lista  go to state 11
+
+
+State 15
+
+    3 naredba: ID_T DODELA_T . izraz
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 30
+    lista  go to state 11
+
+
+State 16
+
+   11 izraz: BROJ_T '*' . izraz
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 31
+    lista  go to state 11
+
+
+State 17
+
+   14 lista: ID_T .
+
+    $default  reduce using rule 14 (lista)
+
+
+State 18
+
+    8 naredba: '|' izraz . '|'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    '|'  shift, and go to state 32
+
+
+State 19
+
+   16 elementi: BROJ_T .
+
+    $default  reduce using rule 16 (elementi)
+
+
+State 20
+
+   13 lista: '<' elementi . '>'
+   15 elementi: elementi . ',' BROJ_T
+
+    ','  shift, and go to state 33
+    '>'  shift, and go to state 34
+
+
+State 21
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 22
+
+    1 program: program naredba . ';'
+
+    ';'  shift, and go to state 35
+
+
+State 23
+
+    2 program: naredba ';' .
+
+    $default  reduce using rule 2 (program)
+
+
+State 24
+
+   10 izraz: izraz '-' . izraz
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 36
+    lista  go to state 11
+
+
+State 25
+
+    9 izraz: izraz '+' . izraz
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 37
+    lista  go to state 11
+
+
+State 26
+
+    7 naredba: izraz '.' . izraz
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 38
+    lista  go to state 11
+
+
+State 27
+
+    4 naredba: PRINT_T '(' izraz . ')'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    ')'  shift, and go to state 39
+
+
+State 28
+
+    5 naredba: UGAO_T '(' izraz . ',' izraz ')'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    ','  shift, and go to state 40
+
+
+State 29
+
+    6 naredba: EQV_T '(' izraz . ',' izraz ')'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    ','  shift, and go to state 41
+
+
+State 30
+
+    3 naredba: ID_T DODELA_T izraz .
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+
+    $default  reduce using rule 3 (naredba)
+
+
+State 31
+
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+   11      | BROJ_T '*' izraz .
+
+    $default  reduce using rule 11 (izraz)
+
+
+State 32
+
+    8 naredba: '|' izraz '|' .
+
+    $default  reduce using rule 8 (naredba)
+
+
+State 33
+
+   15 elementi: elementi ',' . BROJ_T
+
+    BROJ_T  shift, and go to state 42
+
+
+State 34
+
+   13 lista: '<' elementi '>' .
+
+    $default  reduce using rule 13 (lista)
+
+
+State 35
+
+    1 program: program naredba ';' .
+
+    $default  reduce using rule 1 (program)
+
+
+State 36
+
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+   10      | izraz '-' izraz .
+
+    $default  reduce using rule 10 (izraz)
+
+
+State 37
+
+    9 izraz: izraz . '+' izraz
+    9      | izraz '+' izraz .
+   10      | izraz . '-' izraz
+
+    $default  reduce using rule 9 (izraz)
+
+
+State 38
+
+    7 naredba: izraz '.' izraz .
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+
+    $default  reduce using rule 7 (naredba)
+
+
+State 39
+
+    4 naredba: PRINT_T '(' izraz ')' .
+
+    $default  reduce using rule 4 (naredba)
+
+
+State 40
+
+    5 naredba: UGAO_T '(' izraz ',' . izraz ')'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 43
+    lista  go to state 11
+
+
+State 41
+
+    6 naredba: EQV_T '(' izraz ',' . izraz ')'
+
+    ID_T    shift, and go to state 17
+    BROJ_T  shift, and go to state 5
+    '<'     shift, and go to state 7
+
+    izraz  go to state 44
+    lista  go to state 11
+
+
+State 42
+
+   15 elementi: elementi ',' BROJ_T .
+
+    $default  reduce using rule 15 (elementi)
+
+
+State 43
+
+    5 naredba: UGAO_T '(' izraz ',' izraz . ')'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    ')'  shift, and go to state 45
+
+
+State 44
+
+    6 naredba: EQV_T '(' izraz ',' izraz . ')'
+    9 izraz: izraz . '+' izraz
+   10      | izraz . '-' izraz
+
+    '-'  shift, and go to state 24
+    '+'  shift, and go to state 25
+    ')'  shift, and go to state 46
+
+
+State 45
+
+    5 naredba: UGAO_T '(' izraz ',' izraz ')' .
+
+    $default  reduce using rule 5 (naredba)
+
+
+State 46
+
+    6 naredba: EQV_T '(' izraz ',' izraz ')' .
+
+    $default  reduce using rule 6 (naredba)

@@ -1,0 +1,261 @@
+%{
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <vector>
+#include <map>
+    
+#define YYDEBUG 1
+
+extern int yylex();
+
+void yyerror(std::string s){
+    std::cerr << s << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+std::map<std::string, std::vector<std::vector<int>> *> vars;
+
+
+void print_matrix(std::vector<std::vector<int>> *mat){
+    std::cout << "[";
+    for(unsigned int i = 0; i < mat->size(); i++)
+    {
+        if(i != 0)
+            std::cout << ", ";
+        std::cout << "[";
+        for(unsigned int j = 0; j < (*mat)[0].size(); j++)
+        {
+            if(j != 0)
+                std::cout << ", ";
+            std::cout << (*mat)[i][j];
+        }
+        std::cout << "]";
+    }
+    std::cout << "]" << std::endl;
+}
+
+void velicina_matrix(std::vector<std::vector<int>> *mat){
+    std::cout << mat->size() << "x" << ((*mat)[0]).size() << std::endl;
+}
+
+
+std::vector<std::vector<int>>* mat(std::vector<std::vector<int>> *v){
+    std::vector<std::vector<int>>* tmp = new std::vector<std::vector<int>>(v->size(), std::vector<int>());
+    for(unsigned int i = 0; i < v->size(); i++)
+        (*tmp)[i].resize( (*v)[0].size());
+    for(unsigned int i = 0; i < v->size(); i++)
+    {
+        for(unsigned int j = 0; j < (*v)[0].size(); j++)
+        {
+            (*tmp)[i][j] = (*v)[i][j];
+        }
+    }
+    
+    return tmp;
+}
+
+std::vector<std::vector<int>>* mat_sab(std::vector<std::vector<int>> *v1, std::vector<std::vector<int>> *v2){
+    if(  v1->size() != v2->size())
+        return nullptr;
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        if( (*v1)[i].size() !=  (*v2)[i].size() )
+            return nullptr;
+    }
+    
+    std::vector<std::vector<int>>* tmp = new std::vector<std::vector<int>>(v1->size());
+    for(unsigned int i = 0; i < (int)tmp->size(); i++)
+        (*tmp)[i].resize( (*v1)[0].size());
+        
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        for(unsigned int j = 0; j < (*v1)[0].size(); j++)
+        {
+            (*tmp)[i][j] = (*v1)[i][j] + (*v2)[i][j];
+        }
+    }
+    return tmp;
+}
+
+std::vector<std::vector<int>>* mat_mnoz(std::vector<std::vector<int>> *v1, std::vector<std::vector<int>> *v2){
+    if(  v1->size() != v2->size())
+        return nullptr;
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        if( (*v1)[i].size() !=  (*v2)[i].size() )
+            return nullptr;
+    }
+    
+    std::vector<std::vector<int>>* tmp = new std::vector<std::vector<int>>(v1->size());
+    for(unsigned int i = 0; i < (int)tmp->size(); i++)
+        (*tmp)[i].resize( (*v1)[0].size());
+        
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        for(unsigned int j = 0; j < (*v1)[0].size(); j++)
+        {
+            (*tmp)[i][j] = (*v1)[i][j] * (*v2)[i][j];
+        }
+    }
+    return tmp;
+}
+
+std::vector<std::vector<int>>* mat_pomnozi(std::vector<std::vector<int>> *v1, std::vector<std::vector<int>> *v2){
+    if(  (*v1)[0].size() != v2->size())
+        return nullptr;
+    
+    
+    std::vector<std::vector<int>>* tmp = new std::vector<std::vector<int>>(v1->size());
+    for(unsigned int i = 0; i < (int)tmp->size(); i++)
+        (*tmp)[i].resize( (*v2)[0].size());
+        
+    //int total = 0;
+    //2 x 2   2 x 2
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        for(unsigned int j = 0; j < (*v2)[0].size(); j++)
+        {
+            (*tmp)[i][j] = 0;
+            for(unsigned int k = 0; k < (*v1)[0].size(); k++)
+                (*tmp)[i][j] += (*v1)[i][k] * (*v2)[k][j];
+        }
+    }
+    return tmp;
+}
+
+
+std::vector<std::vector<int>>* mat_trans(std::vector<std::vector<int>> *v){
+    std::vector<std::vector<int>>* tmp = new std::vector<std::vector<int>>( (*v)[0].size());
+    for(unsigned int i = 0; i < (int)tmp->size(); i++)
+        (*tmp)[i].resize( v->size());
+        
+    for(unsigned int i = 0; i < v->size(); i++)
+    {
+        for(unsigned int j = 0; j < (*v)[0].size(); j++)
+        {
+            (*tmp)[j][i] = (*v)[i][j];
+        }
+    }
+    return tmp;
+}
+
+%}
+
+%union {
+    int vrednost;
+    std::string *ime;
+    std::vector<int> *row;
+    std::vector<std::vector<int>> *matrix;
+}
+
+%token DISP_T SIZE_T PKSABIRANJE_T PKMNOZENJE_T TRANS_T
+
+%token<vrednost> BROJ_T
+%token<ime> ID_T
+
+%type<row> vrsta
+%type<matrix> matrica niz_vrsta izraz
+
+%left PKSABIRANJE_T
+%left '*' PKMNOZENJE_T
+%nonassoc TRANS_T
+
+%start program
+
+%%
+program:    program naredba '\n'                {}
+            | naredba '\n'                      {}
+            ;
+naredba:    DISP_T '(' izraz ')'                {
+                                                    print_matrix($3);
+                                                    delete $3;
+                                                }
+            | SIZE_T '(' izraz ')'              {   velicina_matrix($3);
+                                                    delete $3;
+                                                }
+            | ID_T '=' izraz                    {
+                                                    auto it = vars.find(*$1);  
+                                                    if(it != vars.end())
+                                                        delete it->second;
+                                                                            
+                                                    vars[*$1] =  mat($3);    
+                                                    delete $3;
+                                                    delete $1;
+                                                }
+            ;
+izraz:      izraz PKSABIRANJE_T izraz           {
+                                                    auto it = mat_sab($1, $3);
+                                                    if( it == nullptr)
+                                                        yyerror("Dimenzije se ne poklapaju");
+                                                    $$ = it;
+                                                    
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | izraz PKMNOZENJE_T izraz          {
+                                                    auto it = mat_mnoz($1, $3);
+                                                    if( it == nullptr)
+                                                        yyerror("Dimenzije se ne poklapaju");
+                                                    $$ = it;
+                                                    
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | izraz TRANS_T                     {
+                                                    $$ = mat_trans($1);
+                                                    delete $1;
+                                                }
+            | izraz '*' izraz                   {
+                                                    auto it = mat_pomnozi($1, $3);
+                                                    if( it == nullptr)
+                                                        yyerror("Dimenzije se ne poklapaju");
+                                                    $$ = it;
+                                                    
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | matrica                           {
+                                                    $$ = $1;
+                                                }
+            ;
+matrica:    '[' niz_vrsta ']'                   { $$ = $2;}   
+            | ID_T                              {
+                                                    auto it = vars.find(*$1);    
+                                                    if(it == vars.end()){
+                                                        delete $1;
+                                                        yyerror("Promenljiva nije definisana");
+                                                    }
+                                                    $$ = mat( it->second );
+                                                    delete $1;
+                                                }
+            ;
+niz_vrsta:  niz_vrsta ';' '[' vrsta ']'         {
+                                                    $1->push_back(*$4);
+                                                    $$ = $1;
+                                                    delete $4;
+                                                }
+            | '[' vrsta  ']'                    {
+                                                    $$ = new std::vector<std::vector<int>>();
+                                                    $$->push_back(*$2);
+                                                    delete $2;
+                                                }      
+            ;
+vrsta:      vrsta ',' BROJ_T                    {
+                                                    $1->push_back($3);
+                                                    $$ = $1;
+                                                }
+            | BROJ_T                            {
+                                                    $$ = new std::vector<int>(1, $1);
+                                                }
+            ;
+%%
+
+int main(int argc, char **argv){
+    //yydebug = 1;
+
+    if(yyparse() == 0)
+        std::cout << "Sve ok" << std::endl;
+    else
+        std::cout << "Greska pri parsiranju" << std::endl;
+}

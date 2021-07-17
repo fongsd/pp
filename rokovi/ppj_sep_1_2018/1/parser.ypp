@@ -1,0 +1,212 @@
+%{
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <string>
+#include <cmath>
+
+#include "kvaternion.hpp"
+
+extern int yylex();
+
+void yyerror(std::string s) {
+	std::cerr << "Greska: " << s << std::endl;
+	exit(EXIT_FAILURE);
+}
+
+std::map<std::string, kvaternion *> promenljive;
+
+%}
+
+%union {
+	std::string *niska;
+	double vrednost;
+	kvaternion *kv;
+	element_t el;
+}
+
+%token DEF_T PRINT_T NORM_T EQ_T
+%token<vrednost> BROJ_T
+%token<niska> FORMAT_T ID_T
+
+%type<el> element
+%type<kv> izraz lista_el
+
+%left '+' '-'
+%left '*' '/'
+%right U_MINUS
+
+%start program
+
+%%
+
+program: program naredba ';'
+	| naredba ';'
+	;
+naredba: DEF_T '(' ID_T ')'					{
+												auto it = promenljive.find(*$3);
+												if(it != promenljive.end())
+													yyerror("Nije podrzano redefinisanje promenljivih");
+												promenljive[*$3] = new kvaternion();
+												delete $3;
+											}
+	| DEF_T '(' ID_T ',' lista_el ')'		{
+												auto it = promenljive.find(*$3);
+												if(it != promenljive.end())
+													yyerror("Nije podrzano redefinisanje promenljivih");
+												promenljive[*$3] = new kvaternion(*$5);
+												delete $5;
+												delete $3;
+											}
+	| PRINT_T '(' FORMAT_T ',' ID_T ')'		{
+												auto it = promenljive.find(*$5);
+												if(it == promenljive.end())
+													yyerror("Upotreba nedefinsane promenljive");
+												if(*$3 == "\"%q\"")
+													std::cout << *$5 << ": " << it->second->s << " + " << it->second->i << "i + " << it->second->j << "j + " << it->second->k << "k" << std::endl;
+												else if(*$3 == "\"%s\"")
+													std::cout << *$5 << ": " << it->second->s << std::endl;
+												else if(*$3 == "\"%i\"")
+													std::cout << *$5 << ": " << it->second->i << "i" << std::endl;
+												else if(*$3 == "\"%j\"")
+													std::cout << *$5 << ": " << it->second->j << "j" << std::endl;
+												else if(*$3 == "\"%k\"")
+													std::cout << *$5 << ": " << it->second->k << "k" << std::endl;
+												else
+													yyerror("Pogresan format");
+												delete $3;
+												delete $5;
+											}
+	| NORM_T '(' ID_T ')'					{
+												auto it = promenljive.find(*$3);
+												if(it == promenljive.end())
+													yyerror("Upotreba nedefinsane promenljive");
+												std::cout << "|" << *$3 << "|" << " = " << sqrt(it->second->s * it->second->s + it->second->i * it->second->i + it->second->j * it->second->j + it->second->k * it->second->k) << std::endl;
+												delete $3;
+											}
+	| ID_T EQ_T izraz						{
+												auto it = promenljive.find(*$1);
+												if(it != promenljive.end())
+													delete it->second;
+												promenljive[*$1] = new kvaternion(*$3);
+												delete $1;
+											}
+	;
+lista_el: lista_el ',' element		{
+										if($3.oznaka == 's' && $1->s == 0)
+											$1->s = $3.vrednost;
+										else if($3.oznaka == 'i' && $1->i == 0)
+											$1->i = $3.vrednost;
+										else if($3.oznaka == 'j' && $1->j == 0)
+											$1->j = $3.vrednost;
+										else if($3.oznaka == 'k' && $1->k == 0)
+											$1->k = $3.vrednost;
+										else
+											yyerror("Jedinica vec definisana");
+										$$ = $1;
+									}
+	| element						{
+										$$ = new kvaternion();
+										if($1.oznaka == 's')
+											$$->s = $1.vrednost;
+										else if($1.oznaka == 'i')
+											$$->i = $1.vrednost;
+										else if($1.oznaka == 'j')
+											$$->j = $1.vrednost;
+										else if($1.oznaka == 'k')
+											$$->k = $1.vrednost;
+									}
+	;
+element: ID_T ':' BROJ_T		{
+									if(*$1 == "s")
+										$$.oznaka = 's';
+									else if(*$1 == "i")
+										$$.oznaka = 'i';
+									else if(*$1 == "j")
+										$$.oznaka = 'j';
+									else if(*$1 == "k")
+										$$.oznaka = 'k';
+									else
+										yyerror("Nepostojeca jedinica");
+									$$.vrednost = $3;
+									delete $1;
+								}
+	;
+izraz: izraz '+' izraz			{
+									kvaternion novi;
+									novi.s = $1->s + $3->s;
+									novi.i = $1->i + $3->i;
+									novi.j = $1->j + $3->j;
+									novi.k = $1->k + $3->k;
+									$$ = new kvaternion(novi);
+									delete $1;
+									delete $3;
+								}
+	| izraz '-' izraz			{
+									kvaternion novi;
+									novi.s = $1->s - $3->s;
+									novi.i = $1->i - $3->i;
+									novi.j = $1->j - $3->j;
+									novi.k = $1->k - $3->k;
+									$$ = new kvaternion(novi);
+									delete $1;
+									delete $3;
+								}
+	| izraz '*' izraz			{
+									kvaternion novi;
+									novi.s = $1->s * $3->s - $1->i * $3->i - $1->j * $3->j - $1->k * $3->k;
+									novi.i = $1->s * $3->i + $1->i * $3->s - $1->j * $3->k + $1->k * $3->j;
+									novi.j = $1->s * $3->j + $1->i * $3->k + $1->j * $3->s - $1->k * $3->i;
+									novi.k = $1->s * $3->k - $1->i * $3->j + $1->j * $3->i + $1->k * $3->s;
+									$$ = new kvaternion(novi);
+									delete $1;
+									delete $3;
+								}
+	| izraz '/' izraz			{
+									kvaternion novi;
+									double del = $1->s * $1->s + $1->i * $1->i + $1->j * $1->j + $1->k * $1->k;
+									novi.s = ($1->s * $3->s + $1->i * $3->i + $1->j * $3->j + $1->k * $3->k) / del;
+									novi.i = ($1->s * $3->i - $1->i * $3->s - $1->j * $3->k + $1->k * $3->j) / del;
+									novi.j = ($1->s * $3->j + $1->i * $3->k - $1->j * $3->s - $1->k * $3->i) / del;
+									novi.k = ($1->s * $3->k - $1->i * $3->j + $1->j * $3->i - $1->k * $3->s) / del;
+                                    $$ = new kvaternion(novi);
+									delete $1;
+									delete $3;
+								}
+	| BROJ_T '*' izraz			{
+									$$ = new kvaternion(*$3);
+									$$->s *= $1;
+									$$->i *= $1;
+									$$->j *= $1;
+									$$->k *= $1;
+									delete $3;
+								}
+	| '-' izraz %prec U_MINUS	{
+									$$ = new kvaternion(*$2);
+									$$->s = -$$->s;
+									$$->i = -$$->i;
+									$$->j = -$$->j;
+									$$->k = -$$->k;
+									delete $2;
+								}
+	| '(' izraz ')'				{ $$ = $2; }
+	| ID_T						{
+									auto it = promenljive.find(*$1);
+									if(it == promenljive.end())
+										yyerror("Upotreba nedefinsane promenljive");
+									$$ = new kvaternion(*(it->second));
+									delete $1;
+								}
+	;
+
+%%
+
+int main(int argc, char *argv[]) {
+	if(yyparse() == 0)
+		std::cout << "Program je sintaksno ispravan" << std::endl;
+	else
+		std::cout << "Program nije sintaksno ispravan" << std::endl;
+	
+	exit(EXIT_SUCCESS);
+}

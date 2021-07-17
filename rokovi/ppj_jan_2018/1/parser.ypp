@@ -1,0 +1,188 @@
+%{
+#define _USE_MATH_DEFINES
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <map>
+#include <vector>
+#include <cmath>
+
+#define YYDEBUG 1
+
+extern int yylex();
+
+void yyerror(std::string s){
+    std::cerr << s << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+std::map<std::string, std::vector<double>*> vars;
+
+void stampaj(std::vector<double> *v){
+    std::cout << "<";
+    for(auto it = v->begin(); it != v->end(); it++)
+    {
+        if(it != v->begin())
+            std::cout << ", ";
+        std::cout << *it;
+    }
+    std::cout << ">" << std::endl;
+}
+
+double norma(std::vector<double> *v1){
+    double n = 0.0;
+    for(double x : *v1)
+        n += (x * x);
+    return sqrt(n);
+}
+
+double skalarni_proizvod(std::vector<double> *v1, std::vector<double> *v2){
+    double res = 0.0;
+    for(unsigned int i = 0; i < v1->size(); i++)
+    {
+        res += (*v1)[i] * (*v2)[i];
+    }
+    return res;
+}
+
+int check_dim(std::vector<double> *v1, std::vector<double> *v2){
+    return v1->size() == v2->size();
+}
+
+double izracunaj_ugao(std::vector<double> *v1, std::vector<double> *v2){
+    double x = skalarni_proizvod(v1, v2) / (norma(v1) * norma(v2));
+    return acos(x);
+}
+
+std::vector<double>* saberi(std::vector<double> *v1, std::vector<double> *v2){
+    std::vector<double>* tmp = new std::vector<double>(v1->size());
+    for(unsigned int i = 0; i < v1->size(); i++)
+        (*tmp)[i] = (*v1)[i] + (*v2)[i];
+    return tmp;
+}
+
+std::vector<double>* oduzmi(std::vector<double> *v1, std::vector<double> *v2){
+    std::vector<double>* tmp = new std::vector<double>(v1->size());
+    for(unsigned int i = 0; i < v1->size(); i++)
+        (*tmp)[i] = (*v1)[i] - (*v2)[i];
+    return tmp;
+}
+
+std::vector<double>* pomnozi_skalarom(std::vector<double> *v1, double alfa){
+    std::vector<double>* tmp = new std::vector<double>(v1->size());
+    for(unsigned int i = 0; i < v1->size(); i++)
+        (*tmp)[i] = (*v1)[i] * alfa;
+    return tmp;
+}
+
+%}
+
+%union {
+    double vrednost;
+    std::string *ime;
+    std::vector<double> *el;
+}
+
+%token DODELA_T PRINT_T UGAO_T EQV_T
+%token<ime> ID_T
+%token<vrednost> BROJ_T
+
+%type<el> elementi lista izraz
+
+%left '-' '+'
+%left '*'
+
+%%
+program:    program naredba ';'                 {}
+            | naredba ';'                       {}
+            ;                                   
+naredba:    ID_T DODELA_T izraz                 {
+                                                    vars[*$1] = new std::vector<double>(*$3);
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | PRINT_T '(' izraz ')'             {
+                                                    stampaj($3);
+                                                    delete $3;
+                                                }
+            | UGAO_T '(' izraz ',' izraz ')'    {
+                                                    if(!check_dim($3, $5))
+                                                      yyerror("greska u dimenzionalnosti vektora");
+                                                   
+                                                        double ug = izracunaj_ugao($3, $5);
+                                                        printf("%g\n", ug * 360 / (2 * M_PI));
+                                                    
+                                                    delete $3;
+                                                    delete $5;
+                                                }
+            | EQV_T '(' izraz ',' izraz ')'     {}
+            | izraz '.' izraz                   {
+                                                    if(!check_dim($1, $3))
+                                                        yyerror("greska u dimenzionalnosti vektora");
+                                                    double sp = skalarni_proizvod($1, $3);
+                                                    printf("%g\n", sp);
+                                                   
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            |  '|' izraz '|'                    {
+                                                    double x = norma($2);
+                                                    printf("%g\n", x);                                                
+                                                    delete $2;
+                                                }
+            ;
+
+izraz:      izraz '+' izraz                     {
+                                                    if(!check_dim($1, $3))
+                                                        yyerror("greska u dimenzionalnosti vektora");
+                                                    $$ = saberi($1, $3);
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | izraz '-' izraz                   {
+                                                    if(!check_dim($1, $3))
+                                                        yyerror("greska u dimenzionalnosti vektora");
+                                                    $$ = oduzmi($1, $3);
+                                                    delete $1;
+                                                    delete $3;
+                                                }
+            | BROJ_T '*' izraz                  {
+                                                    $$ = pomnozi_skalarom($3, $1);
+                                                    delete $3;
+                                                }
+            | lista                             {
+                                                    $$ = $1;
+                                                    
+                                                }
+            ;
+lista:      '<' elementi '>'                    {$$ = $2;}
+            | ID_T                              {
+                                                    auto it = vars.find(*$1);
+                                                    if(it == vars.end()){
+                                                        yyerror("Promenljiva " + (*$1) + " nije definisana");
+                                                    }
+                                                    else {
+                                                        $$ = new std::vector<double>( *(it->second) );
+                                                    }
+                                                    delete $1;
+                                                    
+                                                }
+            ;
+elementi:   elementi ',' BROJ_T                 {
+                                                    $1->push_back($3);
+                                                    $$ = $1;
+                                                }
+            | BROJ_T                            {
+                                                    $$ = new std::vector<double>(1, $1);
+                                                }
+            ;
+%%
+
+int main(int argc, char **argv){
+   // yydebug = 1;
+
+    if(yyparse() == 0)
+        std::cout << "Sve ok" << std::endl;
+    else
+        std::cout << "Greska pri parsiranju" << std::endl;
+}

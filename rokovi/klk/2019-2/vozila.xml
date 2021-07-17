@@ -1,0 +1,45 @@
+<vozilo id="1">
+    <fabrika>Kia</fabrika>
+    <model>Xcee'd</model>
+    <godina>2019</godina>
+    <cena>20570</cena>
+    <snaga_motora>88</snaga_motora>
+    <zapremina>998</zapremina>
+    <gorivo>Benzin-EURO6</gorivo>
+</vozilo>
+<vozilo id="2">
+    <godina>2010</godina>
+    <zapremina>2967.1</zapremina>
+    <gorivo>Dizel-EURO5</gorivo>
+    <cena>22000</cena>
+    <snaga_motora>180</snaga_motora>
+    <fabrika>Porsche</fabrika>
+    <model>Cayenne</model>
+</vozilo>
+<vozilo id="3">
+    <fabrika>Renault</fabrika>
+    <model>Megane</model>
+    <gorivo>Dizel-EURO4</gorivo>
+    <cena>2790</cena>
+    <snaga_motora>110</snaga_motora>
+    <godina>2007</godina>
+    <zapremina>1988</zapremina>
+</vozilo>
+<vozilo id="4">
+<fabrika>Peugeot</fabrika>
+    <model>206</model>
+    <gorivo>TNG-EURO3</gorivo>
+    <cena>1350</cena>
+    <godina>2002</godina>
+    <zapremina>1360</zapremina>
+    <snaga_motora>55</snaga_motora>
+</vozilo>
+<vozilo id="5">
+    <godina>2008</godina>
+    <zapremina>1398</zapremina>
+    <fabrika>Fiat</fabrika>
+    <model>Grande Punto</model>
+    <gorivo>Benzin-EURO4</gorivo>
+    <cena>3800</cena>
+    <snaga_motora>178</snaga_motora>
+</vozilo>

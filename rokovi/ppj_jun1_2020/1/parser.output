@@ -1,0 +1,938 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: program naredba '\n'
+    2        | naredba '\n'
+
+    3 naredba: ID_T '=' izraz
+    4        | LID_T '=' lista
+    5        | izraz
+    6        | lista
+    7        | relacioni
+    8        | RAD_T '(' izraz ')'
+    9        | RAD_T '(' lista ')'
+
+   10 izraz: izraz '+' izraz
+   11      | izraz '-' izraz
+   12      | '(' izraz ')'
+   13      | BROJ_T '*' izraz
+   14      | izraz '*' BROJ_T
+   15      | izraz '/' BROJ_T
+   16      | BROJ_T '.' BROJ_T '.' BROJ_T
+   17      | ID_T
+   18      | LID_T '[' BROJ_T ']'
+   19      | MAX_T '(' lista ')'
+   20      | MIN_T '(' lista ')'
+   21      | PROSEK_T '(' lista ')'
+
+   22 relacioni: izraz EQ_T izraz
+   23          | izraz NEQ_T izraz
+   24          | izraz GTEQ_T izraz
+   25          | izraz LTEQ_T izraz
+   26          | izraz '>' izraz
+   27          | izraz '<' izraz
+
+   28 lista: '[' elementi ']'
+   29      | LID_T
+
+   30 elementi: elementi ',' izraz
+   31         | izraz
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'\n' (10) 1 2
+'(' (40) 8 9 12 19 20 21
+')' (41) 8 9 12 19 20 21
+'*' (42) 13 14
+'+' (43) 10
+',' (44) 30
+'-' (45) 11
+'.' (46) 16
+'/' (47) 15
+'<' (60) 27
+'=' (61) 3 4
+'>' (62) 26
+'[' (91) 18 28
+']' (93) 18 28
+error (256)
+MIN_T (258) 20
+MAX_T (259) 19
+PROSEK_T (260) 21
+EQ_T (261) 22
+NEQ_T (262) 23
+LTEQ_T (263) 25
+GTEQ_T (264) 24
+RAD_T (265) 8 9
+ID_T (266) 3 17
+LID_T (267) 4 18 29
+BROJ_T (268) 13 14 15 16 18
+
+
+Nonterminals, with rules where they appear
+
+$accept (28)
+    on left: 0
+program (29)
+    on left: 1 2, on right: 0 1
+naredba (30)
+    on left: 3 4 5 6 7 8 9, on right: 1 2
+izraz (31)
+    on left: 10 11 12 13 14 15 16 17 18 19 20 21, on right: 3 5 8 10
+    11 12 13 14 15 22 23 24 25 26 27 30 31
+relacioni (32)
+    on left: 22 23 24 25 26 27, on right: 7
+lista (33)
+    on left: 28 29, on right: 4 6 9 19 20 21
+elementi (34)
+    on left: 30 31, on right: 28 30
+
+
+State 0
+
+    0 $accept: . program $end
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    RAD_T     shift, and go to state 4
+    ID_T      shift, and go to state 5
+    LID_T     shift, and go to state 6
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+    '['       shift, and go to state 9
+
+    program    go to state 10
+    naredba    go to state 11
+    izraz      go to state 12
+    relacioni  go to state 13
+    lista      go to state 14
+
+
+State 1
+
+   20 izraz: MIN_T . '(' lista ')'
+
+    '('  shift, and go to state 15
+
+
+State 2
+
+   19 izraz: MAX_T . '(' lista ')'
+
+    '('  shift, and go to state 16
+
+
+State 3
+
+   21 izraz: PROSEK_T . '(' lista ')'
+
+    '('  shift, and go to state 17
+
+
+State 4
+
+    8 naredba: RAD_T . '(' izraz ')'
+    9        | RAD_T . '(' lista ')'
+
+    '('  shift, and go to state 18
+
+
+State 5
+
+    3 naredba: ID_T . '=' izraz
+   17 izraz: ID_T .
+
+    '='  shift, and go to state 19
+
+    $default  reduce using rule 17 (izraz)
+
+
+State 6
+
+    4 naredba: LID_T . '=' lista
+   18 izraz: LID_T . '[' BROJ_T ']'
+   29 lista: LID_T .
+
+    '='  shift, and go to state 20
+    '['  shift, and go to state 21
+
+    $default  reduce using rule 29 (lista)
+
+
+State 7
+
+   13 izraz: BROJ_T . '*' izraz
+   16      | BROJ_T . '.' BROJ_T '.' BROJ_T
+
+    '*'  shift, and go to state 22
+    '.'  shift, and go to state 23
+
+
+State 8
+
+   12 izraz: '(' . izraz ')'
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 26
+
+
+State 9
+
+   28 lista: '[' . elementi ']'
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz     go to state 27
+    elementi  go to state 28
+
+
+State 10
+
+    0 $accept: program . $end
+    1 program: program . naredba '\n'
+
+    $end      shift, and go to state 29
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    RAD_T     shift, and go to state 4
+    ID_T      shift, and go to state 5
+    LID_T     shift, and go to state 6
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+    '['       shift, and go to state 9
+
+    naredba    go to state 30
+    izraz      go to state 12
+    relacioni  go to state 13
+    lista      go to state 14
+
+
+State 11
+
+    2 program: naredba . '\n'
+
+    '\n'  shift, and go to state 31
+
+
+State 12
+
+    5 naredba: izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   22 relacioni: izraz . EQ_T izraz
+   23          | izraz . NEQ_T izraz
+   24          | izraz . GTEQ_T izraz
+   25          | izraz . LTEQ_T izraz
+   26          | izraz . '>' izraz
+   27          | izraz . '<' izraz
+
+    EQ_T    shift, and go to state 32
+    NEQ_T   shift, and go to state 33
+    LTEQ_T  shift, and go to state 34
+    GTEQ_T  shift, and go to state 35
+    '<'     shift, and go to state 36
+    '>'     shift, and go to state 37
+    '+'     shift, and go to state 38
+    '-'     shift, and go to state 39
+    '*'     shift, and go to state 40
+    '/'     shift, and go to state 41
+
+    $default  reduce using rule 5 (naredba)
+
+
+State 13
+
+    7 naredba: relacioni .
+
+    $default  reduce using rule 7 (naredba)
+
+
+State 14
+
+    6 naredba: lista .
+
+    $default  reduce using rule 6 (naredba)
+
+
+State 15
+
+   20 izraz: MIN_T '(' . lista ')'
+
+    LID_T  shift, and go to state 42
+    '['    shift, and go to state 9
+
+    lista  go to state 43
+
+
+State 16
+
+   19 izraz: MAX_T '(' . lista ')'
+
+    LID_T  shift, and go to state 42
+    '['    shift, and go to state 9
+
+    lista  go to state 44
+
+
+State 17
+
+   21 izraz: PROSEK_T '(' . lista ')'
+
+    LID_T  shift, and go to state 42
+    '['    shift, and go to state 9
+
+    lista  go to state 45
+
+
+State 18
+
+    8 naredba: RAD_T '(' . izraz ')'
+    9        | RAD_T '(' . lista ')'
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 46
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+    '['       shift, and go to state 9
+
+    izraz  go to state 47
+    lista  go to state 48
+
+
+State 19
+
+    3 naredba: ID_T '=' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 49
+
+
+State 20
+
+    4 naredba: LID_T '=' . lista
+
+    LID_T  shift, and go to state 42
+    '['    shift, and go to state 9
+
+    lista  go to state 50
+
+
+State 21
+
+   18 izraz: LID_T '[' . BROJ_T ']'
+
+    BROJ_T  shift, and go to state 51
+
+
+State 22
+
+   13 izraz: BROJ_T '*' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 52
+
+
+State 23
+
+   16 izraz: BROJ_T '.' . BROJ_T '.' BROJ_T
+
+    BROJ_T  shift, and go to state 53
+
+
+State 24
+
+   17 izraz: ID_T .
+
+    $default  reduce using rule 17 (izraz)
+
+
+State 25
+
+   18 izraz: LID_T . '[' BROJ_T ']'
+
+    '['  shift, and go to state 21
+
+
+State 26
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   12      | '(' izraz . ')'
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    ')'  shift, and go to state 54
+
+
+State 27
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   31 elementi: izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 31 (elementi)
+
+
+State 28
+
+   28 lista: '[' elementi . ']'
+   30 elementi: elementi . ',' izraz
+
+    ']'  shift, and go to state 55
+    ','  shift, and go to state 56
+
+
+State 29
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 30
+
+    1 program: program naredba . '\n'
+
+    '\n'  shift, and go to state 57
+
+
+State 31
+
+    2 program: naredba '\n' .
+
+    $default  reduce using rule 2 (program)
+
+
+State 32
+
+   22 relacioni: izraz EQ_T . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 58
+
+
+State 33
+
+   23 relacioni: izraz NEQ_T . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 59
+
+
+State 34
+
+   25 relacioni: izraz LTEQ_T . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 60
+
+
+State 35
+
+   24 relacioni: izraz GTEQ_T . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 61
+
+
+State 36
+
+   27 relacioni: izraz '<' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 62
+
+
+State 37
+
+   26 relacioni: izraz '>' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 63
+
+
+State 38
+
+   10 izraz: izraz '+' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 64
+
+
+State 39
+
+   11 izraz: izraz '-' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 65
+
+
+State 40
+
+   14 izraz: izraz '*' . BROJ_T
+
+    BROJ_T  shift, and go to state 66
+
+
+State 41
+
+   15 izraz: izraz '/' . BROJ_T
+
+    BROJ_T  shift, and go to state 67
+
+
+State 42
+
+   29 lista: LID_T .
+
+    $default  reduce using rule 29 (lista)
+
+
+State 43
+
+   20 izraz: MIN_T '(' lista . ')'
+
+    ')'  shift, and go to state 68
+
+
+State 44
+
+   19 izraz: MAX_T '(' lista . ')'
+
+    ')'  shift, and go to state 69
+
+
+State 45
+
+   21 izraz: PROSEK_T '(' lista . ')'
+
+    ')'  shift, and go to state 70
+
+
+State 46
+
+   18 izraz: LID_T . '[' BROJ_T ']'
+   29 lista: LID_T .
+
+    '['  shift, and go to state 21
+
+    $default  reduce using rule 29 (lista)
+
+
+State 47
+
+    8 naredba: RAD_T '(' izraz . ')'
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+    ')'  shift, and go to state 71
+
+
+State 48
+
+    9 naredba: RAD_T '(' lista . ')'
+
+    ')'  shift, and go to state 72
+
+
+State 49
+
+    3 naredba: ID_T '=' izraz .
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 3 (naredba)
+
+
+State 50
+
+    4 naredba: LID_T '=' lista .
+
+    $default  reduce using rule 4 (naredba)
+
+
+State 51
+
+   18 izraz: LID_T '[' BROJ_T . ']'
+
+    ']'  shift, and go to state 73
+
+
+State 52
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   13      | BROJ_T '*' izraz .
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    $default  reduce using rule 13 (izraz)
+
+
+State 53
+
+   16 izraz: BROJ_T '.' BROJ_T . '.' BROJ_T
+
+    '.'  shift, and go to state 74
+
+
+State 54
+
+   12 izraz: '(' izraz ')' .
+
+    $default  reduce using rule 12 (izraz)
+
+
+State 55
+
+   28 lista: '[' elementi ']' .
+
+    $default  reduce using rule 28 (lista)
+
+
+State 56
+
+   30 elementi: elementi ',' . izraz
+
+    MIN_T     shift, and go to state 1
+    MAX_T     shift, and go to state 2
+    PROSEK_T  shift, and go to state 3
+    ID_T      shift, and go to state 24
+    LID_T     shift, and go to state 25
+    BROJ_T    shift, and go to state 7
+    '('       shift, and go to state 8
+
+    izraz  go to state 75
+
+
+State 57
+
+    1 program: program naredba '\n' .
+
+    $default  reduce using rule 1 (program)
+
+
+State 58
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   22 relacioni: izraz EQ_T izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 22 (relacioni)
+
+
+State 59
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   23 relacioni: izraz NEQ_T izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 23 (relacioni)
+
+
+State 60
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   25 relacioni: izraz LTEQ_T izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 25 (relacioni)
+
+
+State 61
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   24 relacioni: izraz GTEQ_T izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 24 (relacioni)
+
+
+State 62
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   27 relacioni: izraz '<' izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 27 (relacioni)
+
+
+State 63
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   26 relacioni: izraz '>' izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 26 (relacioni)
+
+
+State 64
+
+   10 izraz: izraz . '+' izraz
+   10      | izraz '+' izraz .
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 10 (izraz)
+
+
+State 65
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   11      | izraz '-' izraz .
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 11 (izraz)
+
+
+State 66
+
+   14 izraz: izraz '*' BROJ_T .
+
+    $default  reduce using rule 14 (izraz)
+
+
+State 67
+
+   15 izraz: izraz '/' BROJ_T .
+
+    $default  reduce using rule 15 (izraz)
+
+
+State 68
+
+   20 izraz: MIN_T '(' lista ')' .
+
+    $default  reduce using rule 20 (izraz)
+
+
+State 69
+
+   19 izraz: MAX_T '(' lista ')' .
+
+    $default  reduce using rule 19 (izraz)
+
+
+State 70
+
+   21 izraz: PROSEK_T '(' lista ')' .
+
+    $default  reduce using rule 21 (izraz)
+
+
+State 71
+
+    8 naredba: RAD_T '(' izraz ')' .
+
+    $default  reduce using rule 8 (naredba)
+
+
+State 72
+
+    9 naredba: RAD_T '(' lista ')' .
+
+    $default  reduce using rule 9 (naredba)
+
+
+State 73
+
+   18 izraz: LID_T '[' BROJ_T ']' .
+
+    $default  reduce using rule 18 (izraz)
+
+
+State 74
+
+   16 izraz: BROJ_T '.' BROJ_T '.' . BROJ_T
+
+    BROJ_T  shift, and go to state 76
+
+
+State 75
+
+   10 izraz: izraz . '+' izraz
+   11      | izraz . '-' izraz
+   14      | izraz . '*' BROJ_T
+   15      | izraz . '/' BROJ_T
+   30 elementi: elementi ',' izraz .
+
+    '+'  shift, and go to state 38
+    '-'  shift, and go to state 39
+    '*'  shift, and go to state 40
+    '/'  shift, and go to state 41
+
+    $default  reduce using rule 30 (elementi)
+
+
+State 76
+
+   16 izraz: BROJ_T '.' BROJ_T '.' BROJ_T .
+
+    $default  reduce using rule 16 (izraz)

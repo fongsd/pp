@@ -1,0 +1,6 @@
+Y = 1..5;
+Z = {6, 7}; 
+print ~Y /\ ~Z;
+print X;
+print Y;
+card {4, 6, 10};

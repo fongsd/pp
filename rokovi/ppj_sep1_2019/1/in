@@ -1,0 +1,3 @@
+niska s = "abc", p, m = "aaa";
+stampaj(m);
+stampaj(p);

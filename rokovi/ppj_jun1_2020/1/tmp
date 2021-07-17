@@ -1,0 +1,12 @@
+e → t ep
+ep → + t ep
+    | - t ep
+    | ε
+t → f tp
+tp → * tp
+    | / tp
+    | ε
+f → ( e )
+    | BROJ
+    
+

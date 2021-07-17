@@ -1,0 +1,535 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: program naredba ';'
+    2        | naredba ';'
+
+    3 naredba: ID_T '=' izraz
+    4        | PRINT_T '(' izraz ')'
+
+    5 izraz: izraz '+' izraz
+    6      | izraz '-' izraz
+    7      | izraz '*' izraz
+    8      | izraz '/' izraz
+    9      | izraz '.' izraz
+   10      | izraz 'x' izraz
+   11      | izraz '[' izraz ',' izraz ']'
+   12      | '-' izraz
+   13      | '(' izraz ')'
+   14      | ID_T
+   15      | CONST_T
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 4 13
+')' (41) 4 13
+'*' (42) 7
+'+' (43) 5
+',' (44) 11
+'-' (45) 6 12
+'.' (46) 9
+'/' (47) 8
+';' (59) 1 2
+'=' (61) 3
+'[' (91) 11
+']' (93) 11
+'x' (120) 10
+error (256)
+PRINT_T (258) 4
+ID_T (259) 3 14
+CONST_T (260) 15
+U_MINUS (261)
+
+
+Nonterminals, with rules where they appear
+
+$accept (20)
+    on left: 0
+program (21)
+    on left: 1 2, on right: 0 1
+naredba (22)
+    on left: 3 4, on right: 1 2
+izraz (23)
+    on left: 5 6 7 8 9 10 11 12 13 14 15, on right: 3 4 5 6 7 8 9 10
+    11 12 13
+
+
+State 0
+
+    0 $accept: . program $end
+
+    PRINT_T  shift, and go to state 1
+    ID_T     shift, and go to state 2
+
+    program  go to state 3
+    naredba  go to state 4
+
+
+State 1
+
+    4 naredba: PRINT_T . '(' izraz ')'
+
+    '('  shift, and go to state 5
+
+
+State 2
+
+    3 naredba: ID_T . '=' izraz
+
+    '='  shift, and go to state 6
+
+
+State 3
+
+    0 $accept: program . $end
+    1 program: program . naredba ';'
+
+    $end     shift, and go to state 7
+    PRINT_T  shift, and go to state 1
+    ID_T     shift, and go to state 2
+
+    naredba  go to state 8
+
+
+State 4
+
+    2 program: naredba . ';'
+
+    ';'  shift, and go to state 9
+
+
+State 5
+
+    4 naredba: PRINT_T '(' . izraz ')'
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 14
+
+
+State 6
+
+    3 naredba: ID_T '=' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 15
+
+
+State 7
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 8
+
+    1 program: program naredba . ';'
+
+    ';'  shift, and go to state 16
+
+
+State 9
+
+    2 program: naredba ';' .
+
+    $default  reduce using rule 2 (program)
+
+
+State 10
+
+   14 izraz: ID_T .
+
+    $default  reduce using rule 14 (izraz)
+
+
+State 11
+
+   15 izraz: CONST_T .
+
+    $default  reduce using rule 15 (izraz)
+
+
+State 12
+
+   12 izraz: '-' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 17
+
+
+State 13
+
+   13 izraz: '(' . izraz ')'
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 18
+
+
+State 14
+
+    4 naredba: PRINT_T '(' izraz . ')'
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '+'  shift, and go to state 19
+    '-'  shift, and go to state 20
+    '.'  shift, and go to state 21
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+    ')'  shift, and go to state 26
+
+
+State 15
+
+    3 naredba: ID_T '=' izraz .
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '+'  shift, and go to state 19
+    '-'  shift, and go to state 20
+    '.'  shift, and go to state 21
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 3 (naredba)
+
+
+State 16
+
+    1 program: program naredba ';' .
+
+    $default  reduce using rule 1 (program)
+
+
+State 17
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+   12      | '-' izraz .
+
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 12 (izraz)
+
+
+State 18
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+   13      | '(' izraz . ')'
+
+    '+'  shift, and go to state 19
+    '-'  shift, and go to state 20
+    '.'  shift, and go to state 21
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+    ')'  shift, and go to state 27
+
+
+State 19
+
+    5 izraz: izraz '+' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 28
+
+
+State 20
+
+    6 izraz: izraz '-' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 29
+
+
+State 21
+
+    9 izraz: izraz '.' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 30
+
+
+State 22
+
+    7 izraz: izraz '*' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 31
+
+
+State 23
+
+    8 izraz: izraz '/' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 32
+
+
+State 24
+
+   10 izraz: izraz 'x' . izraz
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 33
+
+
+State 25
+
+   11 izraz: izraz '[' . izraz ',' izraz ']'
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 34
+
+
+State 26
+
+    4 naredba: PRINT_T '(' izraz ')' .
+
+    $default  reduce using rule 4 (naredba)
+
+
+State 27
+
+   13 izraz: '(' izraz ')' .
+
+    $default  reduce using rule 13 (izraz)
+
+
+State 28
+
+    5 izraz: izraz . '+' izraz
+    5      | izraz '+' izraz .
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 5 (izraz)
+
+
+State 29
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    6      | izraz '-' izraz .
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 6 (izraz)
+
+
+State 30
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+    9      | izraz '.' izraz .
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 9 (izraz)
+
+
+State 31
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    7      | izraz '*' izraz .
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 7 (izraz)
+
+
+State 32
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    8      | izraz '/' izraz .
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 8 (izraz)
+
+
+State 33
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   10      | izraz 'x' izraz .
+   11      | izraz . '[' izraz ',' izraz ']'
+
+    '['  shift, and go to state 25
+
+    $default  reduce using rule 10 (izraz)
+
+
+State 34
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+   11      | izraz '[' izraz . ',' izraz ']'
+
+    '+'  shift, and go to state 19
+    '-'  shift, and go to state 20
+    '.'  shift, and go to state 21
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+    ','  shift, and go to state 35
+
+
+State 35
+
+   11 izraz: izraz '[' izraz ',' . izraz ']'
+
+    ID_T     shift, and go to state 10
+    CONST_T  shift, and go to state 11
+    '-'      shift, and go to state 12
+    '('      shift, and go to state 13
+
+    izraz  go to state 36
+
+
+State 36
+
+    5 izraz: izraz . '+' izraz
+    6      | izraz . '-' izraz
+    7      | izraz . '*' izraz
+    8      | izraz . '/' izraz
+    9      | izraz . '.' izraz
+   10      | izraz . 'x' izraz
+   11      | izraz . '[' izraz ',' izraz ']'
+   11      | izraz '[' izraz ',' izraz . ']'
+
+    '+'  shift, and go to state 19
+    '-'  shift, and go to state 20
+    '.'  shift, and go to state 21
+    '*'  shift, and go to state 22
+    '/'  shift, and go to state 23
+    'x'  shift, and go to state 24
+    '['  shift, and go to state 25
+    ']'  shift, and go to state 37
+
+
+State 37
+
+   11 izraz: izraz '[' izraz ',' izraz ']' .
+
+    $default  reduce using rule 11 (izraz)

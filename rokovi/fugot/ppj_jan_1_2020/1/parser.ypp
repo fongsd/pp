@@ -1,0 +1,127 @@
+%{
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <map>
+
+extern int yylex();
+
+void yyerror(std::string s) {
+	std::cerr << "Sintaksna greska: " << s << std::endl;
+	exit(EXIT_FAILURE);
+}
+
+std::map<std::string, int> promenljive;
+%}
+
+%union {
+	int vrednost;
+	std::string *ime;
+}
+
+%token BYE_T IZ_T INC_T DEC_T PRINT_T COND_T NEG_T GT_T EQ_T
+%token<vrednost> BROJ_T
+%token<ime> ID_T
+
+%type<vrednost> izraz
+
+%left '+' '-'
+%left '*'
+
+%start program
+
+%%
+
+program: niz_naredbi BYE_T '\n'	{ return 0; }
+	;
+niz_naredbi: niz_naredbi naredba '\n'
+	|
+	;
+naredba: ID_T IZ_T izraz	{
+								promenljive[*$1] = $3;
+								delete $1;
+							}
+	| PRINT_T izraz			{ std::cout << $2 << std::endl; }
+	| COND_T izraz IZ_T GT_T izraz '\n' PRINT_T izraz		{
+																if($2 > $5)
+																	std::cout << (char)$8 << std::endl;
+															}
+	| COND_T izraz IZ_T NEG_T GT_T izraz '\n' PRINT_T izraz	{
+																if($2 <= $6)
+																	std::cout << (char)$9 << std::endl;
+															}
+	| COND_T izraz IZ_T EQ_T izraz '\n' PRINT_T izraz		{
+																if($2 == $5)
+																	std::cout << (char)$8 << std::endl;
+															}
+	| COND_T izraz IZ_T NEG_T EQ_T izraz '\n' PRINT_T izraz {
+																if($2 != $6)
+																	std::cout << (char)$9 << std::endl;
+															}
+	;
+izraz: izraz '+' izraz	{ $$ = std::min($1 + $3, 255); }
+	| izraz '-' izraz	{ $$ = std::max($1 - $3, 0); }
+	| izraz '*' izraz	{ $$ = std::min($1 * $3, 255); }
+	| '(' izraz ')'		{ $$ = $2; }
+	| BROJ_T			{ $$ = $1; }
+	| ID_T				{
+							auto it = promenljive.find(*$1);
+							if(it == promenljive.end())
+								yyerror("Nedefinisana promenljiva");
+							$$ = promenljive[*$1];
+							delete $1;
+						}
+	| INC_T ID_T		{
+							auto it = promenljive.find(*$2);
+							if(it == promenljive.end())
+								yyerror("Nedefinisana promenljiva");
+							if(promenljive[*$2] < 255)
+								$$ = ++promenljive[*$2];
+							else
+								$$ = 255;
+							delete $2;
+						}
+	| DEC_T ID_T		{
+							auto it = promenljive.find(*$2);
+							if(it == promenljive.end())
+								yyerror("Nedefinisana promenljiva");
+							if(promenljive[*$2] > 0)
+								$$ = --promenljive[*$2];
+							else
+								$$ = 0;
+							delete $2;
+						}
+	| ID_T INC_T		{
+							auto it = promenljive.find(*$1);
+							if(it == promenljive.end())
+								yyerror("Nedefinisana promenljiva");
+							if(promenljive[*$1] < 255)
+								$$ = promenljive[*$1]++;
+							else
+								$$ = 255;
+							delete $1;
+						}
+	| ID_T DEC_T		{
+							auto it = promenljive.find(*$1);
+							if(it == promenljive.end())
+								yyerror("Nedefinisana promenljiva");
+							if(promenljive[*$1] > 0)
+								$$ = promenljive[*$1]--;
+							else
+								$$ = 0;
+							delete $1;
+						}
+	;
+
+%%
+
+int main(int argc, char *argv[]) {
+	if(yyparse() == 0)
+		std::cout << "Program je sintaksno ispravan" << std::endl;
+	else
+		std::cout << "Program je sintaksno neispravan" << std::endl;
+		
+	exit(EXIT_SUCCESS);
+}

@@ -1,0 +1,35 @@
+Starting parse
+Entering state 0
+Reading a token: Next token is token LIST_T ()
+Shifting token LIST_T ()
+Entering state 5
+Reading a token: Next token is token LID_T ()
+Shifting token LID_T ()
+Entering state 18
+Reading a token: Next token is token '=' ()
+Shifting token '=' ()
+Entering state 40
+Reading a token: Next token is token '[' ()
+Shifting token '[' ()
+Entering state 37
+Reading a token: Next token is token '-' ()
+Shifting token '-' ()
+Entering state 1
+Reading a token: Next token is token BROJ ()
+Shifting token BROJ ()
+Entering state 6
+Reducing stack by rule 23 (line 135):
+   $1 = token BROJ ()
+-> $$ = nterm izraz ()
+Stack now 0 5 18 40 37 1
+Entering state 14
+Reducing stack by rule 18 (line 122):
+   $1 = token '-' ()
+   $2 = nterm izraz ()
+-> $$ = nterm izraz ()
+Stack now 0 5 18 40 37
+Entering state 56
+Reading a token: Next token is token ',' ()
+Reducing stack by rule 29 (line 168):
+   $1 = nterm izraz ()
+Segmentation fault (core dumped)
